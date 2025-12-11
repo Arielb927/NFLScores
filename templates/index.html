@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Scores & Highlights</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            background-color: rgba(148, 163, 184, 0.1);
+            color: var(--text-secondary);
+        }
+
+        .status-live {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            animation: pulse 2s infinite;
+        }
+
+        .status-final {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .teams-container {
+            margin-top: 1.5rem;
+        }
+
+        .team-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .team-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .team-logo {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .team-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .team-record {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            filter: blur(8px);
+            transition: filter 0.3s ease;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .score.revealed {
+            filter: blur(0);
+        }
+
+        .actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background-color: var(--card-bg);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #0f172a;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            color: #0f172a;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .spoiler-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Loading state for highlights */
+        .btn.loading {
+            opacity: 0.7;
+            cursor: wait;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>NFL Gameday</h1>
+        <p class="subtitle">Live Scores & Highlights • Spoiler Free</p>
+    </header>
+
+    <div class="spoiler-toggle">
+        <button class="btn" onclick="toggleAllScores()">👁️ Reveal All Scores</button>
+    </div>
+
+    <div class="grid">
+        {% for game in games %}
+        <div class="game-card">
+            <div
+                class="status-badge {% if game.status == 'in' %}status-live{% elif game.status == 'post' %}status-final{% endif %}">
+                {{ game.shortDetail }}
+            </div>
+
+            <div class="teams-container">
+                {% for team in game.competitors %}
+                <div class="team-row">
+                    <div class="team-info">
+                        <img src="{{ team.logo }}" alt="{{ team.name }}" class="team-logo">
+                        <div>
+                            <div class="team-name">{{ team.name }}</div>
+                            <div class="team-record">{{ team.record }}</div>
+                        </div>
+                    </div>
+                    <div class="score" onclick="this.classList.toggle('revealed')" title="Click to reveal">
+                        {{ team.score }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="actions">
+                {% if game.highlight_db_query %}
+                <button class="btn btn-primary" onclick="fetchHighlight(this, '{{ game.highlight_db_query }}')">
+                    ▶ Watch Highlights
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function toggleAllScores() {
+            const scores = document.querySelectorAll('.score');
+            const isAnyHidden = Array.from(scores).some(s => !s.classList.contains('revealed'));
+
+            scores.forEach(score => {
+                if (isAnyHidden) {
+                    score.classList.add('revealed');
+                } else {
+                    score.classList.remove('revealed');
+                }
+            });
+        }
+
+        async function fetchHighlight(btn, query) {
+            if (btn.classList.contains('loading')) return;
+
+            const originalText = btn.innerText;
+            btn.innerText = 'Searching...';
+            btn.classList.add('loading');
+
+            try {
+                const response = await fetch(`/api/highlight/${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.link) {
+                    window.open(data.link, '_blank');
+                } else {
+                    alert('No highlight found yet!');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error fetching highlight');
+            } finally {
+                btn.innerText = originalText;
+                btn.classList.remove('loading');
+            }
+        }
+    </script>
+</body>
+
+</html>
