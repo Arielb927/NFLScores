@@ -166,7 +166,7 @@ def watch_highlight():
         best_link = None
         
         if results['result']:
-        if results['result']:
+
             # 1. Look for video from "NFL" channel
             for video in results['result']:
                 channel = video.get('channel', {}).get('name', '')
