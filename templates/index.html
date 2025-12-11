@@ -222,7 +222,39 @@
     <header>
         <h1>NFL Gameday</h1>
         <p class="subtitle">Live Scores & Highlights • Spoiler Free</p>
+
+        <form action="/" method="get" class="week-selector">
+            <select name="week" onchange="this.form.submit()" class="week-dropdown">
+                {% for week in weeks %}
+                <option value="{{ week.value }}" {% if selected_week|string==week.value|string %}selected{% endif %}>
+                    {{ week.label }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
     </header>
+
+    <style>
+        .week-selector {
+            margin-top: 1.5rem;
+        }
+
+        .week-dropdown {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .week-dropdown:hover {
+            border-color: var(--accent);
+        }
+    </style>
 
     <div class="spoiler-toggle">
         <button class="btn" onclick="toggleAllScores()">👁️ Reveal All Scores</button>
