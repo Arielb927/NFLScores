@@ -169,13 +169,15 @@ def watch_highlight():
             # 1. Look for video from "NFL" channel
             for video in results['result']:
                 channel = video.get('channel', {}).get('name', '')
-                if 'NFL' in channel or 'nfl' in channel.lower():
+                # Strict check for Official NFL channel (usually just "NFL")
+                # We also accept "NFL Highlights" or similar official-sounding ones if needed, 
+                # but user asked for "official nfl youtube account".
+                if channel == 'NFL' or channel == 'NFL Highlights': 
                      best_link = video.get('link')
                      break
             
-            # 2. If no Official NFL video found, take the first result
-            if not best_link:
-                best_link = results['result'][0].get('link')
+            # REMOVED: Fallback to random video. 
+            # If official not found, we fall through to the search page below.
                 
         if best_link:
             return redirect(best_link)
