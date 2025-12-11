@@ -1,5 +1,4 @@
 flask
 requests
-youtube-search-python
 gunicorn
 python-dateutil
