@@ -141,16 +141,12 @@ def index():
                     # Simple heuristic for highlights
                     if game['status'] in ['in', 'post']: # In progress or Final
                         query = f"NFL {away_team} vs {home_team} full highlights"
-                        game['highlight_db_query'] = query
+                        # Generate direct link server-side to avoid popup blockers
+                        game['highlight_link'] = get_highlight_video(query)
 
                     games.append(game)
 
     return render_template('index.html', games=games, weeks=weeks, selected_week=selected_week)
-
-@app.route('/api/highlight/<query>')
-def highlight(query):
-    link = get_highlight_video(query)
-    return jsonify({'link': link})
 
 if __name__ == '__main__':
     app.run(debug=True)
