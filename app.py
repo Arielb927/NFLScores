@@ -137,16 +137,55 @@ def index():
                 elif diff < 6 or is_overtime:
                     should_show = True
 
-                if should_show:
+                if diff < 8:
                     # Simple heuristic for highlights
                     if game['status'] in ['in', 'post']: # In progress or Final
                         query = f"NFL {away_team} vs {home_team} full highlights"
-                        # Generate direct link server-side to avoid popup blockers
-                        game['highlight_link'] = get_highlight_video(query)
+                        # Link to our specific redirector
+                        game['highlight_link'] = f"/watch_highlight?query={query}"
 
                     games.append(game)
 
     return render_template('index.html', games=games, weeks=weeks, selected_week=selected_week)
+
+@app.route('/watch_highlight')
+def watch_highlight():
+    from flask import request, redirect
+    from youtubesearchpython import VideosSearch
+    
+    query = request.args.get('query')
+    if not query:
+        return redirect("/") # Fallback to home if no query
+        
+    try:
+        # Search for the video
+        # We want "Official" highlights, typically from "NFL" channel or strictly matching the game
+        search = VideosSearch(query, limit=5)
+        results = search.result()
+        
+        best_link = None
+        
+        if results['result']:
+            # 1. Look for video from "NFL" channel
+            for video in results['result']:
+                channel = video.get('channel', {}).get('name', '')
+                if 'NFL' in channel or 'nfl' in channel.lower():
+                     best_link = video.get('link')
+                     break
+            
+            # 2. If no Official NFL video found, take the first result
+            if not best_link:
+                best_link = results['result'][0].get('link')
+                
+        if best_link:
+            return redirect(best_link)
+            
+    except Exception as e:
+        print(f"Error finding specific video: {e}")
+        
+    # Fallback to search page
+    base_url = "https://www.youtube.com/results?search_query="
+    return redirect(base_url + query.replace(" ", "+"))
 
 if __name__ == '__main__':
     app.run(debug=True)
