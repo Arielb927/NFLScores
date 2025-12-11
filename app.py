@@ -117,28 +117,27 @@ def index():
 
                 # Calculate differential
                 diff = abs(home_score - away_score)
-                # FILTER: Only show if differential < 8
-                # OR if the game hasn't started (score 0-0 logic might be tricky, but assuming they mean finished/live games?
-                # The user said "results", implying finished games. 
-                # But pre-game 0-0 diff is 0, which is < 8. 
-                # Let's include everything < 8. 
-                # Wait, if I include everything < 8, all 0-0 scheduled games will show up. That's probably fine?
-                # The user asked for "results", maybe they only want finished games?
-                # "i don't want all nfl scores, i want only the scores with the point differential under 8 points"
-                # This explicitly talks about "scores". Scheduled games don't have scores.
-                # If I hide scheduled games, I lose the utility of the app for future games.
-                # But "scores with point differential" implies games where points exist.
-                # However, 0-0 is a score?
-                # Let's assume they want close games that are LIVE or FINAL. 
-                # If a game is scheduled (status 'pre'), the score is 0-0. 
-                # If I show 'pre' games, the diff is 0 < 8.
-                # I'll include 'pre' games because otherwise "Week X" view would be empty for upcoming weeks.
-                # But if the user strictly wants "Thrillers", maybe they only care about completed/live?
-                # I'll assume: Show ALL games where diff < 8. This naturally includes 0-0 starts.
-                # If the user strictly meant "Finished Close Games", I might be wrong.
-                # But showing future games is usually desired.
                 
-                if diff < 8:
+                # Check for Overtime
+                # API usually has period > 4 for OT
+                period = event.get('status', {}).get('period', 0)
+                is_overtime = period > 4
+
+                # FILTER LOGIC:
+                # 1. Show all active/scheduled games (status != 'post')
+                # 2. For completed games, show if:
+                #    a. Point differential < 6
+                #    b. OR Game went to Overtime
+                
+                status_state = game['status'] # 'pre', 'in', 'post'
+                
+                should_show = False
+                if status_state != 'post':
+                    should_show = True
+                elif diff < 6 or is_overtime:
+                    should_show = True
+
+                if should_show:
                     # Simple heuristic for highlights
                     if game['status'] in ['in', 'post']: # In progress or Final
                         query = f"NFL {away_team} vs {home_team} full highlights"
