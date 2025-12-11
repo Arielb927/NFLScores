@@ -311,30 +311,7 @@
             });
         }
 
-        async function fetchHighlight(btn, query) {
-            if (btn.classList.contains('loading')) return;
 
-            const originalText = btn.innerText;
-            btn.innerText = 'Searching...';
-            btn.classList.add('loading');
-
-            try {
-                const response = await fetch(`/api/highlight/${encodeURIComponent(query)}`);
-                const data = await response.json();
-
-                if (data.link) {
-                    window.open(data.link, '_blank');
-                } else {
-                    alert('No highlight found yet!');
-                }
-            } catch (e) {
-                console.error(e);
-                alert('Error fetching highlight');
-            } finally {
-                btn.innerText = originalText;
-                btn.classList.remove('loading');
-            }
-        }
     </script>
 </body>
 
