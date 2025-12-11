@@ -286,10 +286,11 @@
             </div>
 
             <div class="actions">
-                {% if game.highlight_db_query %}
-                <button class="btn btn-primary" onclick="fetchHighlight(this, '{{ game.highlight_db_query }}')">
+                {% if game.highlight_link %}
+                <a href="{{ game.highlight_link }}" target="_blank" class="btn btn-primary"
+                    style="text-decoration: none;">
                     ▶ Watch Highlights
-                </button>
+                </a>
                 {% endif %}
             </div>
         </div>
